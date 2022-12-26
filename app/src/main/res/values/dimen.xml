@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tile_width">100dp</dimen>
+    <dimen name="tile_height">100dp</dimen>
+    <dimen name="player_label_size">20sp</dimen>
+    <dimen name="waiting_label_size">35sp</dimen>
+</resources>
