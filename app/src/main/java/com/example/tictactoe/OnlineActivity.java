@@ -1,11 +1,6 @@
 package com.example.tictactoe;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,8 +11,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,7 +33,7 @@ public class OnlineActivity extends AppCompatActivity {
 
     private LinearLayout waitingContainer;
 
-    private ArrayList<ImageView> tiles = new ArrayList<>();
+    private final ArrayList<ImageView> tiles = new ArrayList<>();
 
     private TextView player1Text;
     private TextView player2Text;
@@ -44,7 +41,7 @@ public class OnlineActivity extends AppCompatActivity {
     private DatabaseReference roomsRef;
     private DatabaseReference roomRef;
     private DatabaseReference playersRef;
-    private HashMap<String, Room> roomsMap = new HashMap<>();
+    private final HashMap<String, Room> roomsMap = new HashMap<>();
     private String playerKey;
     private String enemyKey;
     private String nickname;
@@ -52,14 +49,14 @@ public class OnlineActivity extends AppCompatActivity {
     private int currentPlayer;
     private long connectionTime;
     private long currentTime;
-    private long timeout = 10000;
+    private final long timeout = 10000;
     private boolean shouldRunAgain = true;
     private boolean waitingAlertShown = false;
     private AlertDialog waitingAlert;
 
     private Room gameRoom;
 
-    private FirebaseDatabase db = FirebaseDatabase.getInstance();
+    private final FirebaseDatabase db = FirebaseDatabase.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +68,8 @@ public class OnlineActivity extends AppCompatActivity {
         for (int i = 0; i < 9; i++) {
             final int j = i;
             int res = getResources().getIdentifier("tile_" + (i + 1), "id", getPackageName());
-            ImageView tile = (ImageView) findViewById(res);
-            tile.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    cellClicked(tile, j);
-                }
-            });
+            ImageView tile = findViewById(res);
+            tile.setOnClickListener(view -> cellClicked(tile, j));
             tiles.add(tile);
         }
 
@@ -87,37 +79,29 @@ public class OnlineActivity extends AppCompatActivity {
         playersRef = db.getReference("players");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(OnlineActivity.this);
-        builder.setTitle("Online game");
-        builder.setMessage("Enter your nickname");
+        builder.setTitle(getResources().getString(R.string.online_game));
+        builder.setMessage(getResources().getString(R.string.enter_nickname));
 
         EditText input = new EditText(this);
         builder.setView(input);
 
-        builder.setPositiveButton("Play", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                nickname = input.getText().toString();
-                if (nickname.equals("")) {
-                    finish();
-                }
-                else {
-                    Date date = new Date();
-                    connectionTime = date.getTime();
-                    currentTime = connectionTime;
-                    playerKey = playersRef.push().getKey();
-                    playersRef.child(playerKey).setValue(new Player(nickname));
-                    findRoom();
-                    startInterval();
-                }
+        builder.setPositiveButton(getResources().getString(R.string.play), (dialogInterface, i) -> {
+            nickname = input.getText().toString();
+            if (nickname.isEmpty()) {
+                finish();
+            }
+            else {
+                Date date = new Date();
+                connectionTime = date.getTime();
+                currentTime = connectionTime;
+                playerKey = playersRef.push().getKey();
+                playersRef.child(playerKey).setValue(new Player(nickname));
+                findRoom();
+                startInterval();
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                finish();
-            }
-        });
+        builder.setNegativeButton(getResources().getString(R.string.cancel), (dialogInterface, i) -> finish());
 
         builder.show();
     }
@@ -125,37 +109,34 @@ public class OnlineActivity extends AppCompatActivity {
     private void findRoom() {
         roomsRef = db.getReference("rooms");
 
-        roomsRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
+        roomsRef.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            }
+            else {
+                DataSnapshot dataSnapshot = task.getResult();
+                boolean shouldInsertNew = true;
+
+                for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                    roomKey = snapshot.getKey();
+                    Room room = snapshot.getValue(Room.class);
+                    roomsMap.put(roomKey, room);
+                    List<String> playerIds = room.getPlayerIds();
+                    if (playerIds.size() == 1) {
+                        roomRef = snapshot.getRef();
+                        playerIds.add(playerKey);
+                        room.setPlayerIds(playerIds);
+                        Map<String, Object> roomMap = new HashMap<String, Object>();
+                        roomMap.put(roomKey, room);
+                        roomsRef.updateChildren(roomMap);
+                        handleRoomUpdates();
+                        shouldInsertNew = false;
+                        currentPlayer = 2;
+                    }
                 }
-                else {
-                    DataSnapshot dataSnapshot = task.getResult();
-                    boolean shouldInsertNew = true;
 
-                    for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                        roomKey = snapshot.getKey();
-                        Room room = snapshot.getValue(Room.class);
-                        roomsMap.put(roomKey, room);
-                        List<String> playerIds = room.getPlayerIds();
-                        if (playerIds.size() == 1) {
-                            roomRef = snapshot.getRef();
-                            playerIds.add(playerKey);
-                            room.setPlayerIds(playerIds);
-                            Map<String, Object> roomMap = new HashMap<String, Object>();
-                            roomMap.put(roomKey, room);
-                            roomsRef.updateChildren(roomMap);
-                            handleRoomUpdates();
-                            shouldInsertNew = false;
-                            currentPlayer = 2;
-                        }
-                    }
-
-                    if (shouldInsertNew || roomsMap.isEmpty()) {
-                        insertNewRoom();
-                    }
+                if (shouldInsertNew || roomsMap.isEmpty()) {
+                    insertNewRoom();
                 }
             }
         });
@@ -193,22 +174,19 @@ public class OnlineActivity extends AppCompatActivity {
                     List<String> ids = new ArrayList<>(room.playerIds);
                     ids.removeIf(id -> id.equals(playerKey));
                     enemyKey = ids.get(0);
-                    playersRef.child(enemyKey).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DataSnapshot> task) {
-                            if (!task.isSuccessful()) {
-                                Log.e("firebase", "Error getting data", task.getException());
-                            }
-                            else {
-                                DataSnapshot dataSnapshot = task.getResult();
-                                Player player = dataSnapshot.getValue(Player.class);
-                                if (currentPlayer == 1) {
-                                    player1Text.setText(nickname);
-                                    player2Text.setText(player.getName());
-                                } else {
-                                    player2Text.setText(nickname);
-                                    player1Text.setText(player.getName());
-                                }
+                    playersRef.child(enemyKey).get().addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            Log.e("firebase", "Error getting data", task.getException());
+                        }
+                        else {
+                            DataSnapshot dataSnapshot = task.getResult();
+                            Player player = dataSnapshot.getValue(Player.class);
+                            if (currentPlayer == 1) {
+                                player1Text.setText(nickname);
+                                player2Text.setText(player.getName());
+                            } else {
+                                player2Text.setText(nickname);
+                                player1Text.setText(player.getName());
                             }
                         }
                     });
@@ -225,45 +203,39 @@ public class OnlineActivity extends AppCompatActivity {
                     updateTiles();
                     String result = "";
                     if (Helpers.checkIfWon(gameRoom.board, currentPlayer)) {
-                        result = "YOU WON";
+                        result = getResources().getString(R.string.you_won);
                     } else if (Helpers.checkIfWon(gameRoom.board, currentPlayer == 1 ? 2 : 1)) {
-                        result = "YOU LOST";
+                        result = getResources().getString(R.string.you_lost);
                     } else  if (Helpers.checkIfBoardFull(gameRoom.board)) {
-                        result = "DRAW";
+                        result = getResources().getString(R.string.draw);
                     }
 
-                    if (!result.equals("")) {
+                    if (!result.isEmpty()) {
                         Map<String, Object> roomMap = new HashMap<String, Object>();
                         roomMap.put(roomKey, gameRoom);
                         roomsRef.updateChildren(roomMap);
                         AlertDialog.Builder alert = new AlertDialog.Builder(OnlineActivity.this);
-                        alert.setTitle("Game result");
-                        alert.setMessage(result + " - Want to play a revenge?");
-                        alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                gameRoom.setStatus(RoomStatus.FINISHED);
-                                Map<String, Object> roomMap = new HashMap<String, Object>();
-                                roomMap.put(roomKey, gameRoom);
-                                roomsRef.updateChildren(roomMap);
-                                Intent intent = new Intent(OnlineActivity.this, MainActivity.class);
-                                startActivity(intent);
-                            }
+                        alert.setTitle(getResources().getString(R.string.game_result));
+                        alert.setMessage(getResources().getString(R.string.want_to_play_a_revenge, result));
+                        alert.setNegativeButton(getResources().getString(R.string.no), (dialogInterface, i) -> {
+                            gameRoom.setStatus(RoomStatus.FINISHED);
+                            Map<String, Object> roomMap1 = new HashMap<String, Object>();
+                            roomMap1.put(roomKey, gameRoom);
+                            roomsRef.updateChildren(roomMap1);
+                            Intent intent = new Intent(OnlineActivity.this, MainActivity.class);
+                            startActivity(intent);
                         });
-                        alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                waitingContainer.setVisibility(View.VISIBLE);
-                                if (gameRoom.status == RoomStatus.WAITING_FOR_REVENGE) {
-                                    gameRoom.setStatus(RoomStatus.WAITING);
-                                } else {
-                                    gameRoom.setStatus(RoomStatus.WAITING_FOR_REVENGE);
-                                }
-                                gameRoom.setBoard(new ArrayList<Integer>(Collections.nCopies(9, 0)));
-                                Map<String, Object> roomMap = new HashMap<String, Object>();
-                                roomMap.put(roomKey, gameRoom);
-                                roomsRef.updateChildren(roomMap);
+                        alert.setPositiveButton(getResources().getString(R.string.yes), (dialogInterface, i) -> {
+                            waitingContainer.setVisibility(View.VISIBLE);
+                            if (gameRoom.status == RoomStatus.WAITING_FOR_REVENGE) {
+                                gameRoom.setStatus(RoomStatus.WAITING);
+                            } else {
+                                gameRoom.setStatus(RoomStatus.WAITING_FOR_REVENGE);
                             }
+                            gameRoom.setBoard(new ArrayList<Integer>(Collections.nCopies(9, 0)));
+                            Map<String, Object> roomMap12 = new HashMap<String, Object>();
+                            roomMap12.put(roomKey, gameRoom);
+                            roomsRef.updateChildren(roomMap12);
                         });
                         alert.show();
                     }
@@ -283,27 +255,24 @@ public class OnlineActivity extends AppCompatActivity {
     }
 
     private void fixStartingPlayer() {
-        roomRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "Error getting data", task.getException());
-                }
-                else {
-                    DataSnapshot snapshot = task.getResult();
-                    Room room = snapshot.getValue(Room.class);
-                    if (room.currentPlayer.equals(playerKey)) {
-                        if (currentPlayer == 1) {
-                            player1Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
-                        } else {
-                            player2Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
-                        }
+        roomRef.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            }
+            else {
+                DataSnapshot snapshot = task.getResult();
+                Room room = snapshot.getValue(Room.class);
+                if (room.currentPlayer.equals(playerKey)) {
+                    if (currentPlayer == 1) {
+                        player1Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
                     } else {
-                        if (currentPlayer == 1) {
-                            player2Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
-                        } else {
-                            player1Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
-                        }
+                        player2Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
+                    }
+                } else {
+                    if (currentPlayer == 1) {
+                        player2Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
+                    } else {
+                        player1Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.white));
                     }
                 }
             }
@@ -326,14 +295,6 @@ public class OnlineActivity extends AppCompatActivity {
                 player2Text.setTextColor(ContextCompat.getColor(OnlineActivity.this, R.color.dark_grey));
             }
         }
-    }
-
-    private String printBoard(List<Integer> board) {
-        String text = "";
-        for (int i = 0; i < 9; i++) {
-            text += String.valueOf(board.get(i)) + " ";
-        }
-        return text;
     }
 
     private void updateTiles() {
@@ -360,25 +321,19 @@ public class OnlineActivity extends AppCompatActivity {
                 long diff = now - currentTime;
                 if (diff >= timeout && !waitingAlertShown) {
                     AlertDialog.Builder alert = new AlertDialog.Builder(OnlineActivity.this);
-                    alert.setTitle("Can't find a game");
-                    alert.setMessage("Would you like to play an offline game?");
-                    alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            currentTime = now;
-                            waitingAlertShown = false;
-                        }
+                    alert.setTitle(getResources().getString(R.string.cant_find_a_game));
+                    alert.setMessage(getResources().getString(R.string.would_like_to_play_offline));
+                    alert.setNegativeButton(getResources().getString(R.string.no), (dialogInterface, i) -> {
+                        currentTime = now;
+                        waitingAlertShown = false;
                     });
-                    alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            shouldRunAgain = false;
-                            waitingAlertShown = false;
-                            playersRef.child(playerKey).setValue(null);
-                            roomRef.setValue(null);
-                            Intent intent = new Intent(OnlineActivity.this, OfflineActivity.class);
-                            startActivity(intent);
-                        }
+                    alert.setPositiveButton(getResources().getString(R.string.yes), (dialogInterface, i) -> {
+                        shouldRunAgain = false;
+                        waitingAlertShown = false;
+                        playersRef.child(playerKey).setValue(null);
+                        roomRef.setValue(null);
+                        Intent intent = new Intent(OnlineActivity.this, OfflineActivity.class);
+                        startActivity(intent);
                     });
                     waitingAlertShown = true;
                     waitingAlert = alert.create();
@@ -388,7 +343,6 @@ public class OnlineActivity extends AppCompatActivity {
                 if (shouldRunAgain) {
                     interval.postDelayed(this, 500);
                 }
-                // przy revenge dac shouldrunagain na true
             }
         }, 500);
     }

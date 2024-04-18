@@ -11,4 +11,20 @@
     <string name="online_player_1_text">PLAYER 1</string>
     <string name="online_player_2_text">PLAYER 2</string>
     <string name="waiting_label">WAITING</string>
+    <string name="result_draw">Result: DRAW</string>
+    <string name="result_player_won">Result: PLAYER WON</string>
+    <string name="result_computer_won">Result: COMPUTER WON</string>
+    <string name="cant_find_a_game">Can\'t find a game</string>
+    <string name="would_like_to_play_offline">Would you like to play an offline game?</string>
+    <string name="no">NO</string>
+    <string name="yes">YES</string>
+    <string name="game_result">Game result</string>
+    <string name="want_to_play_a_revenge">%s - Want to play a revenge?</string>
+    <string name="you_lost">YOU LOST</string>
+    <string name="you_won">YOU WON</string>
+    <string name="draw">DRAW</string>
+    <string name="cancel">Cancel</string>
+    <string name="play">Play</string>
+    <string name="online_game">Online game</string>
+    <string name="enter_nickname">Enter your nickname</string>
 </resources>

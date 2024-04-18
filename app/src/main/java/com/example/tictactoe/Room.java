@@ -1,7 +1,5 @@
 package com.example.tictactoe;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,8 +13,8 @@ enum RoomStatus {
 
 public class Room {
     RoomStatus status;
-    List<String> playerIds = new ArrayList<String>();
-    List<Integer> board = new ArrayList<Integer>();
+    List<String> playerIds;
+    List<Integer> board;
     String currentPlayer;
 
     public Room() {
@@ -26,39 +24,19 @@ public class Room {
         this.currentPlayer = "";
     }
 
-    public Room(RoomStatus status, List<String> playerIds, List<Integer> board, String currentPlayer) {
-        this.status = status;
-        this.playerIds = playerIds;
-        this.board = board;
-        this.currentPlayer = currentPlayer;
-    }
-
     public Room(List<String> playerIds) {
         this.status = RoomStatus.WAITING;
-        Log.d("xxx", String.valueOf(playerIds.size()));
         this.playerIds = playerIds;
         this.board = new ArrayList<Integer>(Collections.nCopies(9, 0));
         this.currentPlayer = playerIds.get(0);
-    }
-
-    public String getCurrentPlayer() {
-        return currentPlayer;
     }
 
     public void setCurrentPlayer(String currentPlayer) {
         this.currentPlayer = currentPlayer;
     }
 
-    public RoomStatus getStatus() {
-        return status;
-    }
-
     public List<String> getPlayerIds() {
         return playerIds;
-    }
-
-    public List<Integer> getBoard() {
-        return board;
     }
 
     public void setStatus(RoomStatus status) {

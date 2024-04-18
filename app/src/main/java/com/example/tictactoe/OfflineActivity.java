@@ -1,15 +1,14 @@
 package com.example.tictactoe;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,24 +16,12 @@ import java.util.Random;
 
 public class OfflineActivity extends AppCompatActivity {
 
-    private ImageView tile1;
-    private ImageView tile2;
-    private ImageView tile3;
-    private ImageView tile4;
-    private ImageView tile5;
-    private ImageView tile6;
-    private ImageView tile7;
-    private ImageView tile8;
-    private ImageView tile9;
-
-    private LinearLayout player1Icon;
-    private LinearLayout player2Icon;
     private TextView player1Text;
     private TextView player2Text;
 
-    private ArrayList<ImageView> tiles = new ArrayList<ImageView>();
+    private final ArrayList<ImageView> tiles = new ArrayList<ImageView>();
 
-    private ArrayList<Integer> board = new ArrayList<Integer>(Collections.nCopies(9, 0));
+    private final ArrayList<Integer> board = new ArrayList<Integer>(Collections.nCopies(9, 0));
 
     int currentPlayer = 1;
 
@@ -43,8 +30,6 @@ public class OfflineActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_offline);
 
-        player1Icon = findViewById(R.id.player_1_icon);
-        player2Icon = findViewById(R.id.player_2_icon);
         player1Text = findViewById(R.id.player_1_text);
         player2Text = findViewById(R.id.player_2_text);
 

@@ -29,10 +29,6 @@ public class Helpers {
             return true;
         }
 
-        if (board.get(0) == player && board.get(4) == player && board.get(8) == player) {
-            return true;
-        }
-
-        return false;
+        return board.get(0) == player && board.get(4) == player && board.get(8) == player;
     }
 }
