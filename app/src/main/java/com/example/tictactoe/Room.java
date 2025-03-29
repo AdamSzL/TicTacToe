@@ -1,17 +1,18 @@
 package com.example.tictactoe;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-enum RoomStatus {
+enum RoomStatus implements Serializable {
     WAITING,
     PLAYING,
     FINISHED,
     WAITING_FOR_REVENGE,
 }
 
-public class Room {
+public class Room implements Serializable {
     RoomStatus status;
     List<String> playerIds;
     List<Integer> board;
@@ -41,6 +42,18 @@ public class Room {
 
     public void setStatus(RoomStatus status) {
         this.status = status;
+    }
+
+    public RoomStatus getStatus() {
+        return status;
+    }
+
+    public List<Integer> getBoard() {
+        return board;
+    }
+
+    public String getCurrentPlayer() {
+        return currentPlayer;
     }
 
     public void setPlayerIds(List<String> playerIds) {

@@ -1,7 +1,11 @@
 package com.example.tictactoe;
 
-class Player {
+public class Player {
     String name;
+
+    public Player() {
+        this.name = "Player";
+    }
 
     Player(String name) {
         this.name = name;
