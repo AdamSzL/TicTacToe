@@ -50,6 +50,20 @@ The app was originally created as part of my learning journey into Android devel
 This was one of the first more complex Android apps I built. It helped me understand real-time data syncing, multiplayer logic, and Firebase integration.  
 While I now use Jetpack Compose in most of my newer projects, this app represents an important milestone in my Android development journey.
 
+## ▶️ How to Run
+
+To run this project locally:
+
+1. Clone the repository  
+2. Open the project in **Android Studio**  
+3. Set up **Firebase Realtime Database** for your app  
+4. Download your `google-services.json` from the Firebase Console and place it in `/app`  
+5. Build and run the app on an emulator or physical device
+
+> 🔥 Note: The project uses Firebase Realtime Database for multiplayer features. You’ll need to configure your own Firebase project and rules.
+>  
+> Refer to the official [Firebase Setup Guide](https://firebase.google.com/docs/android/setup) for detailed instructions.
+
 ---
 
 > 💡 Check out more of my projects at [szlosarczyk.dev](https://szlosarczyk.dev)
