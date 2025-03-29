@@ -14,6 +14,14 @@ The app was originally created as part of my learning journey into Android devel
 - Custom nickname support in online mode
 - Support for both victory, draw and rematch flow
 
+## 🔧 Tech Stack
+
+- Java
+- Android SDK
+- XML Layouts
+- Android Views
+- Firebase Realtime Database
+
 ## 📸 Screenshots
 
 ### Offline mode
@@ -36,15 +44,6 @@ The app was originally created as part of my learning journey into Android devel
 <img src="https://github.com/user-attachments/assets/2b9974dc-cd2b-469c-8f41-a27027d2fa84" alt="Online game finished - game results - you won" width="300" />
 <img src="https://github.com/user-attachments/assets/4adf20f2-b6e1-4529-90a7-85336fc0eb13" alt="Online game finished - game results - you lost" width="300" />
 
-
-## 🔧 Tech Stack
-
-- Java
-- Android SDK
-- XML Layouts
-- Android Views
-- Firebase Realtime Database
-
 ## 📦 Project Status
 
 This was one of the first more complex Android apps I built. It helped me understand real-time data syncing, multiplayer logic, and Firebase integration.  
@@ -54,15 +53,21 @@ While I now use Jetpack Compose in most of my newer projects, this app represent
 
 To run this project locally:
 
-1. Clone the repository  
+1. Clone or download the repository  
 2. Open the project in **Android Studio**  
-3. Set up **Firebase Realtime Database** for your app  
-4. Download your `google-services.json` from the Firebase Console and place it in `/app`  
-5. Build and run the app on an emulator or physical device
+3. Make sure you're using **Java 17** (required by the Android Gradle Plugin)  
+4. Set up **Firebase Realtime Database** for your app  
+5. Download your `google-services.json` from the Firebase Console and place it in the `/app` directory  
+6. Let Gradle sync and install dependencies  
+7. Build and run the app on an emulator or physical Android device
 
-> 🔥 Note: The project uses Firebase Realtime Database for multiplayer features. You’ll need to configure your own Firebase project and rules.
->  
-> Refer to the official [Firebase Setup Guide](https://firebase.google.com/docs/android/setup) for detailed instructions.
+> ⚠️ If you're using a newer JDK (e.g. Java 21), make sure to switch to **JDK 17** in Android Studio:  
+> `File > Project Structure > SDK Location > JDK`.
+
+> 🔥 The app uses Firebase Realtime Database for online multiplayer features.  
+> You’ll need to create your own Firebase project and configure database rules.
+
+> 📚 [Firebase Setup Guide](https://firebase.google.com/docs/android/setup)
 
 ---
 
